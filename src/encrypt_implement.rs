@@ -1,7 +1,8 @@
-use std::isize;
+use std::{isize, char};
+
 use crate::encrypt_abstract::{Encrypt, Decrypt};
 
-struct VigenereCipher {
+pub struct VigenereCipher {
     key: String,
     alphabet: String,
     shift_n: isize,
@@ -75,13 +76,13 @@ impl VigenereCipher{
 }
 
 impl Encrypt for VigenereCipher {
-    fn encrypt(self, text: String) -> Option<String> {
+    fn encrypt(&self, text: String) -> Option<String> {
         return self.base_crypt(text, |_: usize, a: isize, b: isize| -> usize { (a + b) as usize });
     }
 }
 
 impl Decrypt for VigenereCipher {
-    fn decrypt(self, encrypt_text: String) -> Option<String> {
+    fn decrypt(&self, encrypt_text: String) -> Option<String> {
         return self.base_crypt(encrypt_text, |len: usize, a: isize, b: isize| -> usize { (a + (len as isize) - b) as usize });
     }
 }
