@@ -44,7 +44,7 @@ impl VigenereCipher{
 
         for item in temp_text.chars() {
             {
-                let mut temp_key_iter = key_iter
+                let mut temp_key_iter = key_iter.clone()
                 .clone();
                 let check_key_item = temp_key_iter
                 .nth(0)
