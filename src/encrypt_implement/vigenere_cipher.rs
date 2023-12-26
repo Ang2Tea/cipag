@@ -44,17 +44,28 @@ impl VigenereCipher{
 
         for item in temp_text.chars() {
             {
-                let mut temp_key_iter = key_iter.clone()
+                let mut temp_key_iter = key_iter
                 .clone();
+
                 let check_key_item = temp_key_iter
                 .nth(0)
                 .unwrap_or_else(|| {
                     temp_key_iter = self.key.chars();
-                    temp_key_iter.next().unwrap()
+                    temp_key_iter.nth(0).unwrap()
                 });
+
+                if !self.alphabet.contains(check_key_item) {
+                    _ = key_iter
+                    .next()
+                    .unwrap_or_else( || {
+                        key_iter = self.key.chars();
+                        key_iter.next().unwrap()
+                    });
+                }
     
-                if !self.alphabet.contains(item) || !self.alphabet.contains(check_key_item) {
+                if !self.alphabet.contains(item) {
                     result.push(item);
+
                     continue;
                 }
             }
@@ -66,6 +77,7 @@ impl VigenereCipher{
                     key_iter.next().unwrap()
                 })
             )? as isize;
+
             let item_index = get_char_index(&self.alphabet, item)? as isize;
 
             let shit_n_index = crypt_diff(count_alphabet, crypt_diff(count_alphabet, item_index, key_index) as isize, self.shift_n) % count_alphabet;
