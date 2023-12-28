@@ -17,8 +17,8 @@ pub struct VigenereCipher {
 
 impl VigenereCipher {
     /// Creates a new [`VigenereCipher`] with alphabet.
-    pub fn new(key: &str, alphabet: &str, shift_n: isize) -> Result<Self, ErrorKind> {
-        let result = Self{
+    pub fn new(key: &str, alphabet: &str, shift_n: isize) -> Self {
+        Self{
             key: key.to_lowercase(),
             alphabet: alphabet
             .to_lowercase(),
@@ -27,31 +27,18 @@ impl VigenereCipher {
             .chars()
             .count(),
             shift_n,
-        };
-
-        for item in key.chars() {
-            if !result.alphabet.contains(item) {
-                return Err(ErrorKind::InvalidKeyError(
-                    ErrMessage::new(
-                        String::from("The key has characters that are not found in the alphabet"),
-                        item
-                    )
-                ))
-            }
         }
-
-        Ok(result)
     }
     /// Creates a new [`VigenereCipher`] with alphabet.
-    pub fn new_with_alphabet(key: &str, alphabet: &str) -> Result<Self, ErrorKind> {
+    pub fn new_with_alphabet(key: &str, alphabet: &str) -> Self {
         return Self::new(key, alphabet, SHIFT_N);
     }
     /// Creates a new [`VigenereCipher`] without alphabet.
-    pub fn new_with_shift_n(key: &str, shift_n: isize) -> Result<Self, ErrorKind> {
+    pub fn new_with_shift_n(key: &str, shift_n: isize) -> Self {
         return Self::new(key, DEFAULT_ALPHABET, shift_n);
     }
     /// Creates a new [`VigenereCipher`] without alphabet.
-    pub fn new_with_key(key: &str) -> Result<Self, ErrorKind> {
+    pub fn new_with_key(key: &str) -> Self {
         return Self::new(key, DEFAULT_ALPHABET, SHIFT_N);
     }
     
@@ -79,9 +66,6 @@ impl VigenereCipher {
             crypt_diff_1, 
             self.shift_n
         ) % self.count_alphabet;
-
-        println!("(({} + {} = {}) + {}) % {}", item_index, key_index, crypt_diff_1, self.shift_n, self.count_alphabet);
-        //println!("(({} + {} - {} = {}) + {}) % {}", item_index, key_index, self.count_alphabet, crypt_diff_1, self.shift_n, self.count_alphabet);
 
         return self.alphabet
         .chars()
@@ -114,17 +98,30 @@ impl VigenereCipher {
         .chars();
 
         for item in temp_text.chars() {
+            let temp_key_char = key_iter
+            .clone()
+            .next()
+            .unwrap_or(self.key.chars().next().unwrap());
+
+            let mut next_key_iter = || -> char {
+                key_iter
+                .next()
+                .unwrap_or_else( || {
+                    key_iter = self.key.chars();
+                    key_iter.next().unwrap()
+                })
+            };
+            
+            if !self.alphabet.contains(temp_key_char) {
+                _ = next_key_iter();
+            }
+
             if !self.alphabet.contains(item) {
                 result.push(item);
                 continue;
             }
 
-            let key_char = key_iter
-            .next()
-            .unwrap_or_else( || {
-                key_iter = self.key.chars();
-                key_iter.next().unwrap()
-            });
+            let key_char = next_key_iter();
             let result_char = self.base_crypt_char(item, key_char, crypt_diff)?;
 
             result.push(result_char);
