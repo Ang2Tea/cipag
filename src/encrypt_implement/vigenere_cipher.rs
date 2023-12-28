@@ -56,14 +56,13 @@ impl VigenereCipher {
         self.shift_n = shift_n;
     }
 
-    fn base_crypt_char(&self, char: char, key_char: char, crypt_diff: fn(usize, isize, isize) -> usize) -> Result<char, ErrorKind> {
+    fn base_crypt_char<T>(&self, char: char, key_char: char, crypt_diff: T) -> Result<char, ErrorKind>
+    where T: Fn(isize, isize) -> usize {
         let item_index = get_char_index(&self.alphabet, char)? as isize;
         let key_index = get_char_index(&self.alphabet, key_char)? as isize;
-        let crypt_diff_1 = crypt_diff(self.count_alphabet, item_index, key_index) as isize;
 
         let shit_n_index = crypt_diff(
-            self.count_alphabet, 
-            crypt_diff_1, 
+            crypt_diff(item_index, key_index) as isize, 
             self.shift_n
         ) % self.count_alphabet;
 
@@ -90,7 +89,8 @@ impl VigenereCipher {
         }
     }
 
-    fn base_crypt_text(&self, text: String, crypt_diff: fn(usize, isize, isize) -> usize) -> Result<String, ErrorKind> {
+    fn base_crypt_text<T>(&self, text: String, crypt_diff: T) -> Result<String, ErrorKind>
+    where T: Fn(isize, isize) -> usize {
         let temp_text = text.to_lowercase();
         let mut result = String::new();
 
@@ -122,7 +122,7 @@ impl VigenereCipher {
             }
 
             let key_char = next_key_iter();
-            let result_char = self.base_crypt_char(item, key_char, crypt_diff)?;
+            let result_char = self.base_crypt_char(item, key_char, &crypt_diff)?;
 
             result.push(result_char);
         }
@@ -135,7 +135,7 @@ impl Encrypt for VigenereCipher {
     fn encrypt_text(&self, encrypted_text: String) -> Option<String> {
         return self.base_crypt_text(
             encrypted_text, 
-            |_, a: isize, b: isize| -> usize { (a + b) as usize }
+            |a, b| (a + b) as usize
         )
         .ok();
     }
@@ -144,7 +144,7 @@ impl Encrypt for VigenereCipher {
         return self.base_crypt_char(
             encrypted_char, 
             key_char,
-            |_, a: isize, b: isize| -> usize { (a + b) as usize }
+            |a, b| (a + b) as usize
         )
         .ok();
     }
@@ -154,7 +154,7 @@ impl Decrypt for VigenereCipher {
     fn decrypt_text(&self, decrypted_text: String) -> Option<String> {
         return self.base_crypt_text(
             decrypted_text, 
-            |len: usize, a: isize, b: isize| -> usize { (a + (len as isize) - b) as usize }
+            |a, b| (a + (self.count_alphabet as isize) - b) as usize 
         )
         .ok();
     }
@@ -163,7 +163,7 @@ impl Decrypt for VigenereCipher {
         return self.base_crypt_char(
             decrypted_char, 
             key_char,
-            |len: usize, a: isize, b: isize| -> usize { (a + (len as isize) - b) as usize }
+            |a, b| (a + (self.count_alphabet as isize) - b) as usize 
         )
         .ok();
     }
