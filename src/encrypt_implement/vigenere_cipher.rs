@@ -58,7 +58,9 @@ impl VigenereCipher {
 
     fn base_crypt_char<T>(&self, char: char, key_char: char, crypt_diff: T) -> Result<char, ErrorKind>
     where T: Fn(isize, isize) -> usize {
-        let item_index = get_char_index(&self.alphabet, char)? as isize;
+        let temp_char = char.to_ascii_lowercase();
+        
+        let item_index = get_char_index(&self.alphabet, temp_char)? as isize;
         let key_index = get_char_index(&self.alphabet, key_char)? as isize;
 
         let shit_n_index = crypt_diff(
@@ -91,13 +93,12 @@ impl VigenereCipher {
 
     fn base_crypt_text<T>(&self, text: String, crypt_diff: T) -> Result<String, ErrorKind>
     where T: Fn(isize, isize) -> usize {
-        let temp_text = text.to_lowercase();
         let mut result = String::new();
 
         let mut key_iter = self.key
         .chars();
 
-        for item in temp_text.chars() {
+        for item in text.chars() {
             let temp_key_char = key_iter
             .clone()
             .next()
@@ -116,15 +117,13 @@ impl VigenereCipher {
                 _ = next_key_iter();
             }
 
-            if !self.alphabet.contains(item) {
+            if !self.alphabet.contains(item.to_ascii_lowercase()) {
                 result.push(item);
                 continue;
             }
 
             let key_char = next_key_iter();
-            let result_char = self.base_crypt_char(item, key_char, &crypt_diff)?;
-
-            result.push(result_char);
+            result.push(self.base_crypt_char(item, key_char, &crypt_diff)?);
         }
 
         Ok(result)
