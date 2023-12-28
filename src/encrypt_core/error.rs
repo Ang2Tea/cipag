@@ -1,10 +1,10 @@
 #[derive(Debug, PartialEq)]
-pub struct ErrorMessage<T>{
+pub struct ErrMessage<T>{
     message: String,
     value: T
 }
 
-impl<T> ErrorMessage<T> {
+impl<T> ErrMessage<T> {
     pub fn new( message: String, value: T) -> Self {
         Self {
             message: message,
@@ -15,7 +15,7 @@ impl<T> ErrorMessage<T> {
 
 #[derive(Debug, PartialEq)]
 pub enum ErrorKind {
-    IndexErr(ErrorMessage<usize>),
-    CharErr(ErrorMessage<char>),
-    IteratorErr(ErrorMessage<usize>)
+    IndexError(ErrMessage<usize>),
+    CharError(ErrMessage<char>),
+    InvalidKeyError(ErrMessage<char>)
 }

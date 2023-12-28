@@ -1,83 +1,71 @@
 use cipag::encrypt_implement::VigenereCipher;
-use cipag::encrypt_abstract::{Decrypt, Encrypt};
+use cipag::encrypt_core::{Decrypt, Encrypt};
+use cipag::encrypt_core::error::{ErrorKind, ErrMessage};
 
 const CRYPTO_TEXT: &str = "карл у клары украл кораллы";
 const CRYPTO_KEY: &str = "кларнет";
-const UNCORRECT_CRYPTO_KEY1: &str = "клар нет";
+const SHIFT_N: isize = 1;
 
-const ENCRYPT_TEXT_N0: &str = "хлрь б пюкьы дшхтц цобнрюё";
-const ENCRYPT_TEXT_N1: &str = "цмсэ в рялэь ещцуч чпвосяж";
+const ENCRYPTED_TEXT_N0: &str = "хлрь б пюкьы дшхтц цобнрюё";
+const ENCRYPTED_TEXT_N1: &str = "цмсэ в рялэь ещцуч чпвосяж";
+
+const UNCORRECT_CRYPTO_KEY: &str = "клар нет";
 
 #[test]
 fn test_vigenere_encrypt_n0(){
-    let crypto = VigenereCipher::new(String::from(CRYPTO_KEY));
+    let crypto = VigenereCipher::new_with_key(CRYPTO_KEY)
+    .unwrap();
+
     assert_eq!(
-        Some(String::from(ENCRYPT_TEXT_N0)), 
-        crypto.encrypt(String::from(CRYPTO_TEXT))
+        Some(String::from(ENCRYPTED_TEXT_N0)), 
+        crypto.encrypt_text(String::from(CRYPTO_TEXT))
     );
 }
 
 #[test]
 fn test_vigenere_decrypt_n0(){
-    let crypto = VigenereCipher::new(String::from(CRYPTO_KEY));
+    let crypto = VigenereCipher::new_with_key(CRYPTO_KEY)
+    .unwrap();
 
     assert_eq!(
         Some(String::from(CRYPTO_TEXT)), 
-        crypto.decrypt(String::from(ENCRYPT_TEXT_N0))
+        crypto.decrypt_text(String::from(ENCRYPTED_TEXT_N0))
     );
 }
 
 #[test]
 fn test_vigenere_encrypt_n1(){
-    let mut crypto = VigenereCipher::new(String::from(CRYPTO_KEY));
-    crypto.set_shift_n(1);
+    let crypto = VigenereCipher::new_with_shift_n(CRYPTO_KEY, SHIFT_N)
+    .unwrap();
 
     assert_eq!(
-        Some(String::from(ENCRYPT_TEXT_N1)), 
-        crypto.encrypt(String::from(CRYPTO_TEXT))
+        Some(String::from(ENCRYPTED_TEXT_N1)), 
+        crypto.encrypt_text(String::from(CRYPTO_TEXT))
     );
 }
 
 #[test]
 fn test_vigenere_decrypt_n1() {
-    let mut crypto = VigenereCipher::new(String::from(CRYPTO_KEY));
-    crypto.set_shift_n(1);
+    let crypto = VigenereCipher::new_with_shift_n(CRYPTO_KEY, SHIFT_N)
+    .unwrap();
 
     assert_eq!(
         Some(String::from(CRYPTO_TEXT)), 
-        crypto.decrypt(String::from(ENCRYPT_TEXT_N1))
+        crypto.decrypt_text(String::from(ENCRYPTED_TEXT_N1))
     );
 }
 
 #[test]
-fn test_vigenere_key_n0() {
-    let crypto = VigenereCipher::new(String::from(UNCORRECT_CRYPTO_KEY1));
-
-    let encrypt = crypto.encrypt(String::from(CRYPTO_TEXT));
-    assert_eq!(
-        Some(String::from(ENCRYPT_TEXT_N0)), 
-        encrypt
-    );
+fn test_vigenere_uncorrect_key() {
+    let crypto = VigenereCipher::new_with_key(UNCORRECT_CRYPTO_KEY);
 
     assert_eq!(
-        Some(String::from(CRYPTO_TEXT)), 
-        crypto.decrypt(encrypt.unwrap())
-    );
-}
-
-#[test]
-fn test_vigenere_key_n1() {
-    let mut crypto = VigenereCipher::new(String::from(UNCORRECT_CRYPTO_KEY1));
-    crypto.set_shift_n(1);
-
-    let encrypt = crypto.encrypt(String::from(CRYPTO_TEXT));
-    assert_eq!(
-        Some(String::from(ENCRYPT_TEXT_N1)), 
-        encrypt
-    );
-
-    assert_eq!(
-        Some(String::from(CRYPTO_TEXT)), 
-        crypto.decrypt(encrypt.unwrap())
+        Err(ErrorKind::InvalidKeyError(
+            ErrMessage::new(
+                String::from("The key has characters that are not found in the alphabet"),
+                char::from(' ')
+            )
+        )),
+        crypto
     );
 }
