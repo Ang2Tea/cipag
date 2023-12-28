@@ -1,4 +1,4 @@
-use cipag::encrypt_implement::vigenere_cipher::VigenereCipher;
+use cipag::encrypt_implement::VigenereCipher;
 use cipag::encrypt_abstract::{Decrypt, Encrypt};
 
 const CRYPTO_TEXT: &str = "карл у клары украл кораллы";

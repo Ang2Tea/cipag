@@ -1,3 +1,3 @@
-pub mod vigenere_cipher;
+mod vigenere_cipher;
 
 pub use vigenere_cipher::VigenereCipher;
