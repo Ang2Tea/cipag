@@ -1,6 +1,6 @@
 use std::{isize, char};
 
-use crate::encrypt_abstract::{Encrypt, Decrypt};
+use crate::encrypt_abstract::{Encrypt, Decrypt, ErrorKind};
 
 pub struct VigenereCipher {
     key: String,
@@ -31,7 +31,7 @@ impl VigenereCipher{
         self.shift_n = shift_n;
     }
 
-    fn base_crypt(&self, text: String, crypt_diff: fn(usize, isize, isize) -> usize) -> Option<String> {
+    fn base_crypt(&self, text: String, crypt_diff: fn(usize, isize, isize) -> usize) -> Result<String, ErrorKind> {
         let temp_text = text.to_lowercase();
         let mut result = String::new();
 
@@ -84,28 +84,30 @@ impl VigenereCipher{
 
             result.push(self.alphabet
                 .chars()
-                .nth(shit_n_index)?
+                .nth(shit_n_index)
+                .ok_or(ErrorKind::CharErr(String::from("Error get char for index")))?
             );
 
-            fn get_char_index(collection: &String, item: char) -> Option<usize> {
+
+            fn get_char_index(collection: &str, item: char) -> Result<usize, ErrorKind> {
                 collection
-                .chars()
-                .position(|c| c == item)
+                .find(item)
+                .ok_or(ErrorKind::IndexErr(String::from("Error in get_char_index")))
             }
         }
 
-        Some(result)
+        Ok(result)
     }
 }
 
 impl Encrypt for VigenereCipher {
-    fn encrypt(&self, text: String) -> Option<String> {
+    fn encrypt(&self, text: String) -> Result<String, ErrorKind> {
         return self.base_crypt(text, |_: usize, a: isize, b: isize| -> usize { (a + b) as usize });
     }
 }
 
 impl Decrypt for VigenereCipher {
-    fn decrypt(&self, encrypt_text: String) -> Option<String> {
+    fn decrypt(&self, encrypt_text: String) -> Result<String, ErrorKind> {
         return self.base_crypt(encrypt_text, |len: usize, a: isize, b: isize| -> usize { (a + (len as isize) - b) as usize });
     }
 }
