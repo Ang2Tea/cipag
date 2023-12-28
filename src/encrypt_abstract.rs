@@ -5,3 +5,9 @@ pub trait Encrypt{
 pub trait Decrypt{
     fn decrypt(&self, encrypt_text: String) -> Option<String>;
 }
+
+enum ErrorKind {
+    IndexErr(String),
+    CharErr(String),
+    IteratorErr(String)
+}
