@@ -2,8 +2,8 @@ use std::{isize, char};
 
 use crate::encrypt_core::{Encrypt, Decrypt};
 use crate::encrypt_core::error::{ErrorKind, ErrMessage};
+use crate::encrypt_implement::DEFAULT_ALPHABET;
 
-const DEFAULT_ALPHABET: &str = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
 const SHIFT_N: isize = 0;
 
 #[derive(Debug, PartialEq)]
@@ -138,30 +138,12 @@ impl Encrypt for VigenereCipher {
         )
         .ok();
     }
-
-    fn encrypt_char(&self, encrypted_char: char, key_char: char) -> Option<char> {
-        return self.base_crypt_char(
-            encrypted_char, 
-            key_char,
-            |a, b| (a + b) as usize
-        )
-        .ok();
-    }
 }
 
 impl Decrypt for VigenereCipher {
     fn decrypt_text(&self, decrypted_text: String) -> Option<String> {
         return self.base_crypt_text(
             decrypted_text, 
-            |a, b| (a + (self.count_alphabet as isize) - b) as usize 
-        )
-        .ok();
-    }
-
-    fn decrypt_char(&self, decrypted_char: char, key_char: char) -> Option<char> {
-        return self.base_crypt_char(
-            decrypted_char, 
-            key_char,
             |a, b| (a + (self.count_alphabet as isize) - b) as usize 
         )
         .ok();
